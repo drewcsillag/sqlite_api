@@ -10,7 +10,7 @@ WITH THE_CALL AS (
     FROM api._call
      )
 SELECT "CREATE TABLE `" || THE_NEW_TABLE || "` AS
-    SELECT je.value
+    SELECT z.rowid as src_rowid, je.value
     FROM json_each(z.`" || THE_COLUMN || "`) je, `" || THE_TABLE || "` z;"
 FROM THE_CALL;
 .read docall2.out

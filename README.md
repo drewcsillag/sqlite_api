@@ -21,6 +21,8 @@ you'll need to reset it if you vary from `list`. Alternatively, you
 can just hack `api.sql` to call `.mode` with your desired mode. I may
 decide to go crazy and figure a way to have it remember.
 
+Also, it will drop files named `docall`__maybesomthinghere__`.out`
+
 ## Load a file into a table where each row is a line
 
 This will load the contents of the file `data.json` into a table named `log`
@@ -52,7 +54,7 @@ sqlite> select * from log;
 This will take arrays from the table and column named in arg1 and arg2 respectively, and create
 a new table (arg3) with a single column named `value` that has each of the array items in a separate row.
 
-TODO: like `json_explode_obj`, it should track `src_rowid`
+The `src_rowid` column has the value of the `rowid` column from where the data originated from.
 ```
 sqlite> create table foo (data);
 sqlite> insert into foo (data) values ('[1,2]'), ('[3,4]');
@@ -60,14 +62,14 @@ sqlite> insert into api._call (func, arg1, arg2, arg3) values ('json_explode_arr
 sqlite> .read api.sql
 sqlite> .mode table
 sqlite> select * from exfoo;
-+-------+
-| value |
-+-------+
-| 1     |
-| 2     |
-| 3     |
-| 4     |
-+-------+
++-----------+-------+
+| src_rowid | value |
++-----------+-------+
+| 1         | 1     |
+| 1         | 2     |
+| 2         | 3     |
+| 2         | 4     |
++-----------+-------+
 ```
 
 ## Explode a column of json objects into a table where every top level key is column
