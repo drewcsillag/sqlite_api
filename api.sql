@@ -1,4 +1,4 @@
-
+.mode list
 .once docall.out
 SELECT '.read call_' || func || '.sql' from api._call;
 .read docall.out
