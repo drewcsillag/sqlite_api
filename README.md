@@ -18,13 +18,12 @@ First you have to initialize the api:
 
 **N.B.** it does mess with `.mode` settings so after an api call,
 you'll need to reset it if you vary from `list`. Alternatively, you
-can just hack `api.sql` to call `.mode` with your desired mode. I may
-decide to go crazy and figure a way to have it remember.
+can just hack `api.sql` to call `.mode` with your desired mode after
+it does what it does. I may decide to go crazy and figure a way to
+have it remember.
 
-Also, it will drop files named `docall`_maybesomthinghere_`.out`.
-
-If there is more than one row in `api._call` when `.read api.sql` is called,
-you will have a sad.
+Also, it will drop files named `docall`_maybesomthinghere_`.out` in
+the current directory.
 
 ## Load a file into a table where each row is a line
 
@@ -40,7 +39,7 @@ This is another line
 Yay, one more!
 $ sqlite3 :memory:
 sqlite> .read api_init.sql
-sqlite> insert into api._call(func, arg1, arg2) values ('loadlines', 'test.txt', 'log');
+sqlite> insert into api.call(func, arg1, arg2) values ('loadlines', 'test.txt', 'log');
 sqlite> .read api.sql
 sqlite> .mode table
 sqlite> select * from log;
@@ -61,7 +60,7 @@ The `src_rowid` column has the value of the `rowid` column from where the data o
 ```
 sqlite> create table foo (data);
 sqlite> insert into foo (data) values ('[1,2]'), ('[3,4]');
-sqlite> insert into api._call (func, arg1, arg2, arg3) values ('json_explode_arr', 'foo', 'data', 'exfoo');
+sqlite> insert into api.call (func, arg1, arg2, arg3) values ('json_explode_arr', 'foo', 'data', 'exfoo');
 sqlite> .read api.sql
 sqlite> .mode table
 sqlite> select * from exfoo;
@@ -81,8 +80,9 @@ The `src_rowid` column has the value of the `rowid` column from where the data o
 ```
 sqlite> create table bar (data);
 sqlite> insert into bar (data) values ('{"a": 5, "b": 6}'), ('{"b": 7, "c":8}');
-sqlite> insert into api._call(func, arg1, arg2, arg3) values ('json_explode_obj', 'bar', 'data', 'exbar');
+sqlite> insert into api.call(func, arg1, arg2, arg3) values ('json_explode_obj', 'bar', 'data', 'exbar');
 sqlite> .read api.sql
+sqlite> .mode table
 sqlite> select * from exbar;
 +-----------+---+---+---+
 | src_rowid | a | b | c |
@@ -94,7 +94,7 @@ sqlite> select * from exbar;
 
 ## Print a value
 ```
-sqlite> insert into api._call (func, arg1) values ('print', 'HELLO!');
+sqlite> insert into api.call (func, arg1) values ('print', 'HELLO!');
 sqlite> .read api.sql
 HELLO!
 ```
@@ -103,7 +103,7 @@ HELLO!
 
 Just does nothing.
 ```
-sqlite> insert into api._call (func) values ('noop');
+sqlite> insert into api.call (func) values ('noop');
 sqlite> .read api.sql
 ```
 
@@ -126,21 +126,22 @@ named file at every level, but so far haven't tried it.
 
 # Putting it all together
 
-We'll start with a file named `alltogether.txt` containing:
+If you insert multiple instructions into the `api.call` table, you can
+string together as series of operations. For example, we'll start with
+a file named `alltogether.txt` containing:
 ```
 [{"a": 5, "b": 6}, {"b": 7, "c":8}]
 ```
 
 ```
 sqlite> .read api_init.sql
+sqlite> insert into api.call(func, arg1, arg2, arg3) values 
 -- load in the file
-sqlite> insert into api._call(func, arg1, arg2) values ('loadlines', 'alltogether.txt', 'b');
-sqlite> .read api.sql
+    ('loadlines', 'alltogether.txt', 'b', NULL),
 -- split the array into rows
-sqlite> insert into api._call(func, arg1, arg2, arg3) values ('json_explode_arr', 'b', 'line', 'bs');
-sqlite> .read api.sql
--- explode the json into columns
-sqlite> insert into api._call(func, arg1, arg2, arg3) values ('json_explode_obj', 'bs', 'value', 'battrs');
+    ('json_explode_arr', 'b', 'line', 'bs'),
+-- explode the json into columns	
+	('json_explode_obj', 'bs', 'value', 'battrs');
 sqlite> .read api.sql
 sqlite> .mode table
 sqlite> select * from b;
