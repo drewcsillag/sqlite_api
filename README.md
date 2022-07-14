@@ -21,7 +21,10 @@ you'll need to reset it if you vary from `list`. Alternatively, you
 can just hack `api.sql` to call `.mode` with your desired mode. I may
 decide to go crazy and figure a way to have it remember.
 
-Also, it will drop files named `docall`__maybesomthinghere__`.out`
+Also, it will drop files named `docall`_maybesomthinghere_`.out`.
+
+If there is more than one row in `api._call` when `.read api.sql` is called,
+you will have a sad.
 
 ## Load a file into a table where each row is a line
 
@@ -120,6 +123,47 @@ actually goes one level deeper to do all it does.
 
 I suspect you could get to full recursion if you wrote to the same
 named file at every level, but so far haven't tried it.
+
+# Putting it all together
+
+We'll start with a file named `alltogether.txt` containing:
+```
+[{"a": 5, "b": 6}, {"b": 7, "c":8}]
+```
+
+```
+sqlite> .read api_init.sql
+-- load in the file
+sqlite> insert into api._call(func, arg1, arg2) values ('loadlines', 'alltogether.txt', 'b');
+sqlite> .read api.sql
+-- split the array into rows
+sqlite> insert into api._call(func, arg1, arg2, arg3) values ('json_explode_arr', 'b', 'line', 'bs');
+sqlite> .read api.sql
+-- explode the json into columns
+sqlite> insert into api._call(func, arg1, arg2, arg3) values ('json_explode_obj', 'bs', 'value', 'battrs');
+sqlite> .read api.sql
+sqlite> .mode table
+sqlite> select * from b;
++-----------------+-------------------------------------+
+|      name       |                line                 |
++-----------------+-------------------------------------+
+| alltogether.txt | [{"a": 5, "b": 6}, {"b": 7, "c":8}] |
++-----------------+-------------------------------------+
+sqlite> select * from bs;
++-----------+---------------+
+| src_rowid |     value     |
++-----------+---------------+
+| 1         | {"a":5,"b":6} |
+| 1         | {"b":7,"c":8} |
++-----------+---------------+
+sqlite> select * from battrs;
++-----------+---+---+---+
+| src_rowid | a | b | c |
++-----------+---+---+---+
+| 1         | 5 | 6 |   |
+| 2         |   | 7 | 8 |
++-----------+---+---+---+
+```
 
 # TODOs
 
