@@ -29,8 +29,23 @@ line. The table has two columns `name` and `line` and `name` is the name of
 the file it was loaded from and `line` is the line from the file.
 
 ```
-insert into api._call (func, arg1, arg2) values ('loadlines', 'data.json', 'log');
-.read api.sql
+$ cat test.txt
+This is line 1
+This is another line
+Yay, one more!
+$ sqlite3 :memory:
+sqlite> .read api_init.sql
+sqlite> insert into api._call(func, arg1, arg2) values ('loadlines', 'test.txt', 'log');
+sqlite> .read api.sql
+sqlite> .mode table
+sqlite> select * from log;
++----------+----------------------+
+|   name   |         line         |
++----------+----------------------+
+| test.txt | This is line 1       |
+| test.txt | This is another line |
+| test.txt | Yay, one more!       |
++----------+----------------------+
 ```
 
 ## Explode a column of json arrays into rows
@@ -41,8 +56,9 @@ TODO: like `json_explode_obj`, it should track `src_rowid`
 ```
 sqlite> create table foo (data);
 sqlite> insert into foo (data) values ('[1,2]'), ('[3,4]');
-sqlite> insert into api._call (func, arg1, arg2 ,arg3) values ('json_explode_arr', 'foo', 'data', 'exfoo');
+sqlite> insert into api._call (func, arg1, arg2, arg3) values ('json_explode_arr', 'foo', 'data', 'exfoo');
 sqlite> .read api.sql
+sqlite> .mode table
 sqlite> select * from exfoo;
 +-------+
 | value |
