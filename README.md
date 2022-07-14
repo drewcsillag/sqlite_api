@@ -25,7 +25,7 @@ Also, it will drop files named `docall`__maybesomthinghere__`.out`
 
 ## Load a file into a table where each row is a line
 
-This will load the contents of the file `data.json` into a table named `log`
+This will load the contents of the file `test.txt` into a table named `log`
 (which it will create if it doesn't already exist) and put in one row per
 line. The table has two columns `name` and `line` and `name` is the name of 
 the file it was loaded from and `line` is the line from the file.
