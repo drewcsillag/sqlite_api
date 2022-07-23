@@ -1,6 +1,9 @@
 ATTACH DATABASE ':memory:' as api;
-CREATE TABLE IF NOT EXISTS api._call (
+CREATE TABLE api._call (
    func, arg1, arg2, arg3);
    
-CREATE TABLE IF NOT EXISTS api.call (
+CREATE TABLE api.call (
    func, arg1, arg2, arg3);
+
+CREATE TABLE api.config(
+    path);

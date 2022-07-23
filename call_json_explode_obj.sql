@@ -45,7 +45,7 @@ WITH de AS (
     je.key
 )
 SELECT
-  'CREATE TABLE `" || THE_NEW_TABLE || "` (src_rowid INTEGER, ' || group_concat('`' || key || '` TEXT', ', ') || ');'
+  'CREATE TABLE `" || THE_NEW_TABLE || "` (src_rowid INTEGER, ' || group_concat('`' || key || '` TEXT', ', ') || ', FOREIGN KEY(src_rowid) REFERENCES `" || THE_TABLE || "`(`" || THE_COLUMN || "`));'
 from
   de
 UNION ALL
