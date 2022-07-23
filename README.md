@@ -166,6 +166,19 @@ sqlite> select * from battrs;
 +-----------+---+---+---+
 ```
 
+# Miscellaneous
+You probably don't want to have to copy this all around any time you want to use it. So what can do is
+use the `api.config` table to tell the api where to load its files from.
+
+So if your sqlite_api directory is a subdirectory of the current directory, you can
+do something like this:
+```
+.read sqlite_api/api_init.sql
+insert into api.config (path) VALUES ('./sqlite_api/');
+... insert your calls into api.call ...
+.read sqlite_api/api.sql
+```
+
 # TODOs
 
 As part of API initialization, I'd like to be able to have the
