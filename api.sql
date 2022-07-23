@@ -6,7 +6,7 @@ SELECT
 WITH config AS (
     SELECT COALESCE( (SELECT path FROM api.config), '.') AS path
 )
-  SELECT func, arg1, arg2, arg3 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+  SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
 .once docall1.out
 SELECT '.read ' || (SELECT path FROM config) || 'call_' || func || '.sql' from api._call;
 .read docall1.out

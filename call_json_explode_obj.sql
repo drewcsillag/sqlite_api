@@ -27,7 +27,11 @@
 
 .once docall2.out
 WITH THE_CALL AS (
-   SELECT arg1 AS THE_TABLE, arg2 AS THE_COLUMN, arg3 AS THE_NEW_TABLE
+   SELECT arg1 AS THE_TABLE, arg2 AS THE_COLUMN, arg3 AS THE_NEW_TABLE,
+      CASE WHEN arg4 is NULL 
+      THEN "" 
+      ELSE " WHERE `" || arg2 || "` != ''{}''" 
+      END AS THE_WHERE
      FROM api._call
      )
      
@@ -50,7 +54,8 @@ from
   de
 UNION ALL
 SELECT
-  'INSERT INTO " || THE_NEW_TABLE || " SELECT rowid, ' || group_concat('json_extract(`" || THE_COLUMN || "`, ''$.' || key || ''')', ', ') || ' from `" || THE_TABLE || "`;'
+  'INSERT INTO " || THE_NEW_TABLE || " SELECT rowid, ' || group_concat('json_extract(`" || THE_COLUMN 
+      || "`, ''$.' || key || ''')', ', ') || ' from `" || THE_TABLE || "`" || THE_WHERE || ";'
  FROM
    de;"
   from THE_CALL

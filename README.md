@@ -92,6 +92,10 @@ sqlite> select * from exbar;
 +-----------+---+---+---+
 ```
 
+You can also supply a value to `arg4` in the `api.call` table to have it exclude rows in the output 
+where the input json object was empty, avoiding a bunch of rows that would otherwise contain just
+a `src_rowid` value. The value supplied merely needs to be not `NULL`.
+
 ## Print a value
 ```
 sqlite> insert into api.call (func, arg1) values ('print', 'HELLO!');
