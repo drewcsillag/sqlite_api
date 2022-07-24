@@ -55,7 +55,7 @@ from
 UNION ALL
 SELECT
   'INSERT INTO " || THE_NEW_TABLE || " SELECT rowid, ' || group_concat('json_extract(`" || THE_COLUMN 
-      || "`, ''$.' || key || ''')', ', ') || ' from `" || THE_TABLE || "`" || THE_WHERE || ";'
+      || "`, ''$.""' || key || '""'')', ', ') || ' from `" || THE_TABLE || "`" || THE_WHERE || ";'
  FROM
    de;"
   from THE_CALL
