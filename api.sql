@@ -1,7 +1,3 @@
-.once .sqlite_temp/docall0.out
-.mode
-
-.mode list
 
 SELECT a FROM ( -- to inhibit the output of writefile
 SELECT writefile('.sqlite_temp/docalls.out', group_concat(lines.block, char(10))) a -- group_concat to glue
@@ -46,13 +42,3 @@ GROUP BY key
 
 -- .read .sqlite_temp/docall1.out
 -- DELETE from api._call;
-
-.once .sqlite_temp/docall0-1.out
-WITH inds AS (
-    SELECT p, instr(p, char(10)) as cr, instr(p, ':') + 2 AS modestart 
-    FROM (
-        SELECT readfile('.sqlite_temp/docall0.out') AS p
-    )
-) SELECT '.mode ' || substr(p, modestart, cr-modestart) 
-  FROM inds;
-.read .sqlite_temp/docall0-1.out

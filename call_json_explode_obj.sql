@@ -41,7 +41,10 @@ WITH THE_CALL AS (
     )
      
 SELECT 0 AS key, "
-.once .sqlite_temp/docall3.out
+SELECT a FROM ( -- to inhibit the output of writefile
+SELECT writefile('.sqlite_temp/docall3.out', group_concat(lines.block, char(10))) a -- group_concat to glue
+FROM (
+
 WITH de AS (
   -- get the set of top level keys
   SELECT
@@ -56,19 +59,23 @@ WITH de AS (
     je.key
 )
 SELECT
-  'CREATE TABLE `" || THE_NEW_TABLE || "` (
+  0 AS key, 'CREATE TABLE `" || THE_NEW_TABLE || "` (
       src_rowid INTEGER, ' || group_concat('`' || key || '` TEXT', ', ')
-      || ', FOREIGN KEY(src_rowid) REFERENCES `" || THE_TABLE || "`(`" || THE_COLUMN || "`));'
+      || ', FOREIGN KEY(src_rowid) REFERENCES `" || THE_TABLE || "`(`" || THE_COLUMN || "`));' AS block
 from
   de
 UNION ALL
 SELECT
-  'INSERT INTO " || THE_NEW_TABLE || " SELECT rowid, ' || group_concat('json_extract(`" || THE_COLUMN 
+  0, 'INSERT INTO " || THE_NEW_TABLE || " SELECT rowid, ' || group_concat('json_extract(`" || THE_COLUMN 
       || "`, ''$.""' || key || '""'')', ', ') || ' FROM `" || THE_TABLE
       || "` WHERE json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN
       || "`) AND json_type(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) = ''object''" || THE_WHERE || ";'
  FROM
-   de;" AS block
+   de
+) lines
+GROUP BY key
+) WHERE a = 0;
+;" AS block
   from THE_CALL
 UNION ALL
 SELECT 0, '.read .sqlite_temp/docall3.out'
