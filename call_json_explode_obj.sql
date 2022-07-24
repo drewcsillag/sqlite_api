@@ -25,7 +25,12 @@
 --   de;
 -- -- .read docall2.out
 
-.once .sqlite_temp/docall2.out
+-- .once .sqlite_temp/docall2.out
+
+SELECT a FROM ( -- to inhibit the output of writefile
+SELECT writefile('.sqlite_temp/docalls.out', group_concat(lines.block, char(10))) a -- group_concat to glue
+FROM (
+
 WITH THE_CALL AS (
    -- rename the args to things that make it easier to see what's going on below
    SELECT arg1 AS THE_TABLE, arg2 AS THE_COLUMN, arg3 AS THE_NEW_TABLE,
@@ -37,7 +42,7 @@ WITH THE_CALL AS (
     FROM api._call
     )
      
-SELECT "
+SELECT 0 AS key, "
 .once .sqlite_temp/docall3.out
 WITH de AS (
   -- get the set of top level keys
@@ -65,9 +70,13 @@ SELECT
       || "` WHERE json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN
       || "`) AND json_type(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) = ''object''" || THE_WHERE || ";'
  FROM
-   de;"
+   de;" AS block
   from THE_CALL
 UNION ALL
-SELECT '.read .sqlite_temp/docall3.out';
+SELECT 0, '.read .sqlite_temp/docall3.out'
+) lines
+GROUP BY key
+) WHERE a = 0;
+;
 
 .read .sqlite_temp/docall2.out
