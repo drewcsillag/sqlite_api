@@ -27,7 +27,9 @@
 
 .once .sqlite_temp/docall2.out
 WITH THE_CALL AS (
+   -- rename the args to things that make it easier to see what's going on below
    SELECT arg1 AS THE_TABLE, arg2 AS THE_COLUMN, arg3 AS THE_NEW_TABLE,
+      -- filter out empty objects when configured to do so
       CASE WHEN arg4 is NULL 
       THEN "" 
       ELSE " WHERE `" || arg2 || "` != ''{}''" 
@@ -38,6 +40,7 @@ WITH THE_CALL AS (
 SELECT "
 .once .sqlite_temp/docall3.out
 WITH de AS (
+  -- get the set of top level keys
   SELECT
     distinct(je.key)
   FROM
@@ -49,7 +52,9 @@ WITH de AS (
     je.key
 )
 SELECT
-  'CREATE TABLE `" || THE_NEW_TABLE || "` (src_rowid INTEGER, ' || group_concat('`' || key || '` TEXT', ', ') || ', FOREIGN KEY(src_rowid) REFERENCES `" || THE_TABLE || "`(`" || THE_COLUMN || "`));'
+  'CREATE TABLE `" || THE_NEW_TABLE || "` (
+      src_rowid INTEGER, ' || group_concat('`' || key || '` TEXT', ', ')
+      || ', FOREIGN KEY(src_rowid) REFERENCES `" || THE_TABLE || "`(`" || THE_COLUMN || "`));'
 from
   de
 UNION ALL
