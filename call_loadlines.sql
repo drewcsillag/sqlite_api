@@ -30,7 +30,7 @@ SELECT "WITH split(word, str) AS (
         substr(str, instr(str, CHAR(10))+1)
     FROM split
     WHERE str!=''
-) INSERT INTO `" || THE_TABLE || "` SELECT """ || THE_FILENAME || """, word FROM split WHERE word != '';"
+) INSERT INTO `" || THE_TABLE || "` SELECT """ || THE_FILENAME || """, word FROM split;"
  FROM THE_call;
  
 .read docall2.out
