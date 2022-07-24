@@ -32,7 +32,7 @@ WITH THE_CALL AS (
       -- filter out empty objects when configured to do so
       CASE WHEN arg4 is NULL 
       THEN "" 
-      ELSE " WHERE `" || arg2 || "` != ''{}''" 
+      ELSE " AND `" || arg2 || "` != ''{}''"
       END AS THE_WHERE
     FROM api._call
     )
@@ -48,6 +48,7 @@ WITH de AS (
     json_each(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) je
   WHERE
     json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN || "`)
+    AND 'object' = json_type(`" || THE_TABLE || "`.`" || THE_COLUMN || "`)
   ORDER BY
     je.key
 )
@@ -60,7 +61,9 @@ from
 UNION ALL
 SELECT
   'INSERT INTO " || THE_NEW_TABLE || " SELECT rowid, ' || group_concat('json_extract(`" || THE_COLUMN 
-      || "`, ''$.""' || key || '""'')', ', ') || ' from `" || THE_TABLE || "`" || THE_WHERE || ";'
+      || "`, ''$.""' || key || '""'')', ', ') || ' FROM `" || THE_TABLE
+      || "` WHERE json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN
+      || "`) AND json_type(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) = ''object''" || THE_WHERE || ";'
  FROM
    de;"
   from THE_CALL
