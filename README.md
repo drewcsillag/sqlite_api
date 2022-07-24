@@ -16,12 +16,6 @@ First you have to initialize the api:
 
 `.read api_init.sql` to make sure the api is initialized.
 
-**N.B.** it does mess with `.mode` settings so after an api call,
-you'll need to reset it if you vary from `list`. Alternatively, you
-can just hack `api.sql` to call `.mode` with your desired mode after
-it does what it does. I may decide to go crazy and figure a way to
-have it remember.
-
 Also, it will drop files named `docall`_maybesomthinghere_`.out` in
 the current directory.
 
@@ -41,7 +35,6 @@ $ sqlite3 :memory:
 sqlite> .read api_init.sql
 sqlite> insert into api.call(func, arg1, arg2) values ('loadlines', 'test.txt', 'log');
 sqlite> .read api.sql
-sqlite> .mode table
 sqlite> select * from log;
 +----------+----------------------+
 |   name   |         line         |
@@ -62,7 +55,6 @@ sqlite> create table foo (data);
 sqlite> insert into foo (data) values ('[1,2]'), ('[3,4]');
 sqlite> insert into api.call (func, arg1, arg2, arg3) values ('json_explode_arr', 'foo', 'data', 'exfoo');
 sqlite> .read api.sql
-sqlite> .mode table
 sqlite> select * from exfoo;
 +-----------+-------+
 | src_rowid | value |
@@ -82,7 +74,6 @@ sqlite> create table bar (data);
 sqlite> insert into bar (data) values ('{"a": 5, "b": 6}'), ('{"b": 7, "c":8}');
 sqlite> insert into api.call(func, arg1, arg2, arg3) values ('json_explode_obj', 'bar', 'data', 'exbar');
 sqlite> .read api.sql
-sqlite> .mode table
 sqlite> select * from exbar;
 +-----------+---+---+---+
 | src_rowid | a | b | c |
@@ -147,7 +138,6 @@ sqlite> insert into api.call(func, arg1, arg2, arg3) values
 -- explode the json into columns	
 	('json_explode_obj', 'bs', 'value', 'battrs');
 sqlite> .read api.sql
-sqlite> .mode table
 sqlite> select * from b;
 +-----------------+-------------------------------------+
 |      name       |                line                 |

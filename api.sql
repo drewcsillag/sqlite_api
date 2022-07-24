@@ -1,3 +1,6 @@
+.once docall0.out
+.mode
+
 .mode list
 
 .once docalls.out
@@ -24,3 +27,13 @@ WITH config AS (
 SELECT '.read ' || (SELECT path FROM config) || 'call_' || func || '.sql' from api._call;
 .read docall1.out
 DELETE from api._call;
+
+.once docall0-1.out
+WITH inds AS (
+    SELECT p, instr(p, char(10)) as cr, instr(p, ':') + 2 AS modestart 
+    FROM (
+        SELECT readfile('docall0.out') AS p
+    )
+) SELECT '.mode ' || substr(p, modestart, cr-modestart) 
+  FROM inds;
+.read docall0-1.out
