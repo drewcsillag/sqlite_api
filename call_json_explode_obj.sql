@@ -25,10 +25,8 @@
 --   de;
 -- -- .read docall2.out
 
--- .once .sqlite_temp/docall2.out
-
 SELECT a FROM ( -- to inhibit the output of writefile
-SELECT writefile('.sqlite_temp/docalls.out', group_concat(lines.block, char(10))) a -- group_concat to glue
+SELECT writefile('.sqlite_temp/docall2.out', group_concat(lines.block, char(10))) a -- group_concat to glue
 FROM (
 
 WITH THE_CALL AS (
