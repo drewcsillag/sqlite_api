@@ -173,9 +173,3 @@ insert into api.config (path) VALUES ('./sqlite_api/');
 .read sqlite_api/api.sql
 ```
 
-# TODOs
-
-As part of API initialization, I'd like to be able to have the
-"library" in a different directory. You'd have to insert this info
-somewhere, but that would allow the library to properly locate other
-library files as needed.
