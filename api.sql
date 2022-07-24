@@ -1,39 +1,39 @@
-.once docall0.out
+.once .sqlite_temp/docall0.out
 .mode
 
 .mode list
 
-.once docalls.out
+.once .sqlite_temp/docalls.out
 SELECT 
 "INSERT INTO api._call
 WITH config AS (
     SELECT COALESCE( (SELECT path FROM api.config), '.') AS path
 )
   SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
-.once docall1.out
+.once .sqlite_temp/docall1.out
 SELECT '.read ' || (SELECT path FROM config) || 'call_' || func || '.sql' from api._call;
-.read docall1.out
+.read .sqlite_temp/docall1.out
 DELETE from api._call;
 DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
 "
 FROM api.call;
-.read docalls.out
+.read .sqlite_temp/docalls.out
 
 
-.once docall1.out
+.once .sqlite_temp/docall1.out
 WITH config AS (
     SELECT COALESCE( (SELECT path FROM api.config), '.') AS path
 )
 SELECT '.read ' || (SELECT path FROM config) || 'call_' || func || '.sql' from api._call;
-.read docall1.out
+.read .sqlite_temp/docall1.out
 DELETE from api._call;
 
-.once docall0-1.out
+.once .sqlite_temp/docall0-1.out
 WITH inds AS (
     SELECT p, instr(p, char(10)) as cr, instr(p, ':') + 2 AS modestart 
     FROM (
-        SELECT readfile('docall0.out') AS p
+        SELECT readfile('.sqlite_temp/docall0.out') AS p
     )
 ) SELECT '.mode ' || substr(p, modestart, cr-modestart) 
   FROM inds;
-.read docall0-1.out
+.read .sqlite_temp/docall0-1.out

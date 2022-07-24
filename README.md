@@ -17,7 +17,7 @@ First you have to initialize the api:
 `.read api_init.sql` to make sure the api is initialized.
 
 Also, it will drop files named `docall`_maybesomthinghere_`.out` in
-the current directory.
+the a directory in the current directory named `.sqlite_temp`.
 
 ## Load a file into a table where each row is a line
 

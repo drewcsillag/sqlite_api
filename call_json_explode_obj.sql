@@ -25,7 +25,7 @@
 --   de;
 -- -- .read docall2.out
 
-.once docall2.out
+.once .sqlite_temp/docall2.out
 WITH THE_CALL AS (
    SELECT arg1 AS THE_TABLE, arg2 AS THE_COLUMN, arg3 AS THE_NEW_TABLE,
       CASE WHEN arg4 is NULL 
@@ -36,7 +36,7 @@ WITH THE_CALL AS (
      )
      
 SELECT "
-.once docall3.out
+.once .sqlite_temp/docall3.out
 WITH de AS (
   SELECT
     distinct(je.key)
@@ -60,6 +60,6 @@ SELECT
    de;"
   from THE_CALL
 UNION ALL
-SELECT '.read docall3.out';
+SELECT '.read .sqlite_temp/docall3.out';
 
-.read docall2.out
+.read .sqlite_temp/docall2.out

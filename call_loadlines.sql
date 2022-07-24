@@ -15,7 +15,7 @@
 -- ) insert into x SELECT THE_FILENAME,  word FROM split WHERE word!='';
 -- .once docall2.out
 
-.once docall2.out
+.once .sqlite_temp/docall2.out
 WITH THE_CALL AS (
    SELECT arg1 AS THE_FILENAME, arg2 AS THE_TABLE FROM api._call
    )
@@ -33,4 +33,4 @@ SELECT "WITH split(word, str) AS (
 ) INSERT INTO `" || THE_TABLE || "` SELECT """ || THE_FILENAME || """, word FROM split;"
  FROM THE_call;
  
-.read docall2.out
+.read .sqlite_temp/docall2.out
