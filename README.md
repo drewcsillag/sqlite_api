@@ -102,6 +102,20 @@ sqlite> insert into api.call (func) values ('noop');
 sqlite> .read api.sql
 ```
 
+# What Got Skipped?
+`json_explode_arr` and `json_explode_obj` skip non-JSON rows, as well as JSON
+things that are not arrays or objects, respectively. You might want to check
+to know what if anything got skipped.
+
+If `f` is the original table, `t` the original column, and `o` the new table, you can run this query to
+find the rows in the original table that were skipped.
+```
+SELECT f.t
+FROM f
+LEFT OUTER JOIN o ON f.rowid = o.src_rowid
+WHERE o.src_rowid IS NULL;
+```
+
 # How does it work?
 
 In short, by making heavy use of `.once`, generating more sql with a
