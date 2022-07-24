@@ -1,5 +1,5 @@
--- arg1 THE_FILENAME
--- arg2 THE_TABLE
+-- arg 1 THE_FILENAME
+-- arg 2 THE_TABLE
 
 -- generate a create table (if not exist) and a sqlstatement that looks like this
 

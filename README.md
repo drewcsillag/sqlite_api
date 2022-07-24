@@ -136,7 +136,7 @@ sqlite> insert into api.call(func, arg1, arg2, arg3) values
 -- split the array into rows
     ('json_explode_arr', 'b', 'line', 'bs'),
 -- explode the json into columns	
-	('json_explode_obj', 'bs', 'value', 'battrs');
+    ('json_explode_obj', 'bs', 'value', 'battrs');
 sqlite> .read api.sql
 sqlite> select * from b;
 +-----------------+-------------------------------------+

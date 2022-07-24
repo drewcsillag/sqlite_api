@@ -1,4 +1,4 @@
--- arg1 table
+-- arg 1 table
 -- arg 2 col
 -- arg 3 new table
 

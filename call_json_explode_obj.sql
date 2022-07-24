@@ -32,8 +32,8 @@ WITH THE_CALL AS (
       THEN "" 
       ELSE " WHERE `" || arg2 || "` != ''{}''" 
       END AS THE_WHERE
-     FROM api._call
-     )
+    FROM api._call
+    )
      
 SELECT "
 .once .sqlite_temp/docall3.out
@@ -41,7 +41,7 @@ WITH de AS (
   SELECT
     distinct(je.key)
   FROM
-    " || THE_TABLE || ",
+    `" || THE_TABLE || "`,
     json_each(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) je
   WHERE
     json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN || "`)
