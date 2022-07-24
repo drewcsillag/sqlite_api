@@ -11,6 +11,7 @@ WITH THE_CALL AS (
      )
 SELECT "CREATE TABLE `" || THE_NEW_TABLE || "` AS
     SELECT z.rowid as src_rowid, je.value
-    FROM json_each(z.`" || THE_COLUMN || "`) je, `" || THE_TABLE || "` z;"
+    FROM json_each(z.`" || THE_COLUMN || "`) je, `" || THE_TABLE || "` z 
+    WHERE json_valid(z.`" || THE_COLUMN || "`);"
 FROM THE_CALL;
 .read .sqlite_temp/docall2.out
