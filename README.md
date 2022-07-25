@@ -45,44 +45,85 @@ sqlite> select * from log;
 +----------+----------------------+
 ```
 
-## Load a file with an initial colon delimiter into a table
+## Load a file with colon delimiters into a table
 There are a few file formats that have _something_ followed by a `:` followed 
 by the rest of a line. The output of `grep` and `gsh` do this, but there are 
 others.
 
+The arguments to put in the `api.call` table are
+  * func: `split_on_colon`
+  * arg1: the table we're going to split from
+  * arg2: the columns from that table to carry over into the new table
+  * arg3: the column in the original table to split on the colon
+  * arg4: the name of the table to be created
+  * arg5: the name of the column in the new table that will hold the text
+       between the beginning of the line and the first colon
+The remainder of the line from whence we split will be put in a column named `line`.
+
 For example, if you grepped the source code for WHERE statements like this:
 ```
-$ grep WHERE *.sql > glog.txt
+$ grep -n WHERE *.sql > glog.txt
 ```
-And the first few lines would look like this:
+And the first few lines of `glog.txt` would look like this:
 ```
-api.sql:  SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
-api.sql:WHERE a = 0;
-api.sql:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
+api.sql:13:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+api.sql:18:WHERE a = 0;
+api.sql:21:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
+api.sql:27:) WHERE a = 0;
+api.sql:42:-- ' as line from api._call)) WHERE a = 0;
+api_init.sql:3:SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;
+call_json_explode_arr.sql:19:    WHERE json_valid(z.`" || THE_COLUMN || "`)
+call_json_explode_arr.sql:22:)) WHERE a = 0
+call_json_explode_obj.sql:12:--   WHERE
+call_json_explode_obj.sql:39:      END AS THE_WHERE
 ```
 
 You can do this:
 ```
 sqlite> .read api_init.sql
 sqlite> insert into api.call VALUES
-   ...>    ('loadlines_colon', 'glog.txt', 'b', null, null);
+   ...>    ('loadlines_colon', 'glog.txt', 'b', null, null),
+   ...>    ('split_on_colon', 'b', 'name', 'line', 'bs', 'file');
 sqlite> .read api.sql
-sqlite> select * from b
-   ...> ;
-+----------+---------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-|   name   |          prefix           |                                                              line                                                               |
-+----------+---------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-| glog.txt | api.sql                   |   SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid; |
-| glog.txt | api.sql                   | WHERE a = 0;                                                                                                                    |
-| glog.txt | api.sql                   | DELETE from api.call WHERE rowid = (select min(rowid) from api.call);                                                           |
-| glog.txt | api.sql                   | ) WHERE a = 0;                                                                                                                  |
-| glog.txt | api.sql                   | -- ' as line from api._call)) WHERE a = 0;                                                                                      |
-| glog.txt | api_init.sql              | SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;                                                     |
-| glog.txt |                           | random line without a colon                                                                                                     |
-|                                                                                                                  |
+sqlite> select * from bs;
++-----------+----------+---------------------------+---------------------------------------------------------------------------------------------------------------+
+| src_rowid |   name   |           file            |                                                     line                                                      |
++-----------+----------+---------------------------+---------------------------------------------------------------------------------------------------------------+
+| 1         | glog.txt | api.sql                   | 13:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;                                                       |
+| 2         | glog.txt | api.sql                   | 18:WHERE a = 0;                                                                                               |
+| 3         | glog.txt | api.sql                   | 21:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);                                      |
+| 4         | glog.txt | api.sql                   | 27:) WHERE a = 0;                                                                                             |
+| 5         | glog.txt | api.sql                   | 42:-- ' as line from api._call)) WHERE a = 0;                                                                 |
+| 6         | glog.txt | api_init.sql              | 3:SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;                                 |
+| 7         | glog.txt | call_json_explode_arr.sql | 19:    WHERE json_valid(z.`" || THE_COLUMN || "`)                                                             |
+| 8         | glog.txt | call_json_explode_arr.sql | 22:)) WHERE a = 0                                                                                             |
+| 9         | glog.txt | call_json_explode_obj.sql | 12:--   WHERE                                                                                                 |                                                                                      |
 ... more lines here ...
 ```
-In the above example, I added a line without a colon on it to illustrate how this is handled.
+
+If we were doing `gsh` or `grep` without the `-n`, we'd be all good, but here, the line column starts with *number*:, which 
+isn't wonderful. We can do `split_on_colon` again, here we drop to column that only held `glog.txt` by only carrying the column 
+named `file` into the new table.
+
+```
+sqlite> insert into api.call VALUES
+   ...>    ('split_on_colon', 'bs', 'file', 'line', 'bss', 'lineno');
+sqlite> .read api.sql
+sqlite> select * from bss;
++-----------+---------------------------+--------+------------------------------------------------------------------------------------------------------------+
+| src_rowid |           file            | lineno |                                                    line                                                    |
++-----------+---------------------------+--------+------------------------------------------------------------------------------------------------------------+
+| 1         | api.sql                   | 13     |   FROM api.call) fmin WHERE fmin.m = api.call.rowid;                                                       |
+| 2         | api.sql                   | 18     | WHERE a = 0;                                                                                               |
+| 3         | api.sql                   | 21     | DELETE from api.call WHERE rowid = (select min(rowid) from api.call);                                      |
+| 4         | api.sql                   | 27     | ) WHERE a = 0;                                                                                             |
+| 5         | api.sql                   | 42     | -- ' as line from api._call)) WHERE a = 0;                                                                 |
+| 6         | api_init.sql              | 3      | SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;                                |
+| 7         | call_json_explode_arr.sql | 19     |     WHERE json_valid(z.`" || THE_COLUMN || "`)                                                             |
+| 8         | call_json_explode_arr.sql | 22     | )) WHERE a = 0                                                                                             |
+| 9         | call_json_explode_obj.sql | 12     | --   WHERE                                                                                                 |
+
+```
 ## Explode a column of json arrays into rows
 This will take arrays from the table and column named in arg1 and arg2 respectively, and create
 a new table (arg3) with a single column named `value` that has each of the array items in a separate row.
