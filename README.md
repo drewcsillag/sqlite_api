@@ -45,6 +45,44 @@ sqlite> select * from log;
 +----------+----------------------+
 ```
 
+## Load a file with an initial colon delimiter into a table
+There are a few file formats that have _something_ followed by a `:` followed 
+by the rest of a line. The output of `grep` and `gsh` do this, but there are 
+others.
+
+For example, if you grepped the source code for WHERE statements like this:
+```
+$ grep WHERE *.sql > glog.txt
+```
+And the first few lines would look like this:
+```
+api.sql:  SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+api.sql:WHERE a = 0;
+api.sql:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
+```
+
+You can do this:
+```
+sqlite> .read api_init.sql
+sqlite> insert into api.call VALUES
+   ...>    ('loadlines_colon', 'glog.txt', 'b', null, null);
+sqlite> .read api.sql
+sqlite> select * from b
+   ...> ;
++----------+---------------------------+---------------------------------------------------------------------------------------------------------------------------------+
+|   name   |          prefix           |                                                              line                                                               |
++----------+---------------------------+---------------------------------------------------------------------------------------------------------------------------------+
+| glog.txt | api.sql                   |   SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid; |
+| glog.txt | api.sql                   | WHERE a = 0;                                                                                                                    |
+| glog.txt | api.sql                   | DELETE from api.call WHERE rowid = (select min(rowid) from api.call);                                                           |
+| glog.txt | api.sql                   | ) WHERE a = 0;                                                                                                                  |
+| glog.txt | api.sql                   | -- ' as line from api._call)) WHERE a = 0;                                                                                      |
+| glog.txt | api_init.sql              | SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;                                                     |
+| glog.txt |                           | random line without a colon                                                                                                     |
+|                                                                                                                  |
+... more lines here ...
+```
+In the above example, I added a line without a colon on it to illustrate how this is handled.
 ## Explode a column of json arrays into rows
 This will take arrays from the table and column named in arg1 and arg2 respectively, and create
 a new table (arg3) with a single column named `value` that has each of the array items in a separate row.
@@ -118,15 +156,16 @@ WHERE o.src_rowid IS NULL;
 
 # How does it work?
 
-In short, by making heavy use of `.once`, generating more sql with a
+In short, by making heavy use of `writefile`, generating more sql with a
 `SELECT`, and then calling `.read` with the file specified in
-`.once`. The simplest case is in `api.sql` itself.  It calls `.once
-docall.out` and using a `SELECT` generates a call to `.read` with a
-generated filename based on func. More specifically, it just prepends
+`writefile`. The simplest case is in `api.sql` itself. Some of the
+`writefile` calls generate other calls to `writefile` and `.read` with a
+generated filename based on func. But the main dispatch on the function
+name just prepends
 it with `call_` and suffixes it with `.sql`.
 
 The downstream commands, except `noop` then basically repeat the
-pattern, doing `.once docall2.out`, and using a `SELECT` to generate
+pattern, doing `writefile` in a `SELECT` to generate
 more sql that it later `.read`s. In the case of `json_explode_obj`, it
 actually goes one level deeper to do all it does.
 
