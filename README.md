@@ -187,3 +187,8 @@ insert into api.config (path) VALUES ('./sqlite_api/');
 .read sqlite_api/api.sql
 ```
 
+# VSCode
+If you install the `vscode-sqlite` plugin in vscode, you'll want
+to use the `.cd` command so it runs where you think, but it works.
+
+![vscode shot](vscode.png)
