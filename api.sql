@@ -9,7 +9,7 @@ INSERT INTO api._call
 WITH config AS (
     SELECT COALESCE( (SELECT path FROM api.config), './') AS path
 )
-  SELECT func, arg1, arg2, arg3, arg4 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+  SELECT func, arg1, arg2, arg3, arg4, arg5 FROM api.call, (SELECT MIN(rowid) AS m FROM api.call) fmin WHERE fmin.m = api.call.rowid;
 SELECT a FROM ( -- to inhibit the output of writefile
 SELECT writefile('.sqlite_temp/docall1.out', line) a FROM (
   SELECT '.read ' || (SELECT COALESCE( (SELECT path FROM api.config), './') AS path) || 'call_' || func || '.sql' AS line from api._call

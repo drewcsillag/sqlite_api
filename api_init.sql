@@ -3,10 +3,10 @@ ATTACH DATABASE ':memory:' as api;
 SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;
 
 CREATE TABLE api._call (
-   func, arg1, arg2, arg3, arg4);
+   func, arg1, arg2, arg3, arg4, arg5);
    
 CREATE TABLE api.call (
-   func, arg1, arg2, arg3, arg4);
+   func, arg1, arg2, arg3, arg4, arg5);
 
 CREATE TABLE api.config(
     path);
