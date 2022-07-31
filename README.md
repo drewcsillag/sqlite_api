@@ -272,3 +272,7 @@ If you install the `vscode-sqlite` plugin in vscode, you'll want
 to use the `.cd` command so it runs where you think, but it works.
 
 ![vscode shot](vscode.png)
+
+# TODOs
+
+* Probably some notion of a compound command

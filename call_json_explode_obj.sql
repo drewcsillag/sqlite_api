@@ -59,7 +59,7 @@ WITH de AS (
     je.key
 )
 SELECT
-  0 AS key, 'CREATE TABLE `" || THE_NEW_TABLE || "` (
+  0 AS key, 'CREATE TABLE IF NOT EXISTS `" || THE_NEW_TABLE || "` (
       src_rowid INTEGER, ' || group_concat('`' || key || '` TEXT', ', ')
       || ', FOREIGN KEY(src_rowid) REFERENCES `" || THE_TABLE || "`(`" || THE_COLUMN || "`));' AS block
 from
