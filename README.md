@@ -1,3 +1,4 @@
+some test crap
 # sqlite_commands
 
 While I've also got [sqlp](https://github.com/drewcsillag/sqlp), there
