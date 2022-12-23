@@ -1,3 +1,15 @@
+----- If there's anything in api.commands, convert them to api.call
+INSERT INTO api.call
+    SELECT
+        json_extract(j, '$[0]'),
+        json_extract(j, '$[1]'),
+        json_extract(j, '$[2]'),
+        json_extract(j, '$[3]'),
+        json_extract(j, '$[4]'),
+        json_extract(j, '$[5]')
+    FROM (
+    SELECT '["' || REPLACE(command, ' ', '","') || '"]' AS j FROM api.command);
+DELETE FROM api.command;
 
 SELECT a FROM ( -- to inhibit the output of writefile
 SELECT writefile('.sqlite_temp/docalls.out', group_concat(lines.block, char(10))) a -- group_concat to glue

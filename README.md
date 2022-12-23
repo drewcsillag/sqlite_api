@@ -9,7 +9,7 @@ all cases.
 This was more of a way to think "If SQLite could have some notion of
 stored procedures for at least command line use..."
 
-So what can you do with this? 
+So what can you do with this?
 
 All of this assumes you're using the `sqlite3` command-line tool.
 First you have to initialize the api:
@@ -19,11 +19,40 @@ First you have to initialize the api:
 Also, it will drop files named `docall`_maybesomthinghere_`.out` in
 the a directory in the current directory named `.sqlite_temp`.
 
+## Commands
+
+While the below examples insert into api.call, and you can continue to do so,
+it's probably easier to use the api.command form, where it's just a space delimited
+line that get's split into the `func` and `arg`s columns of api.call.
+
+For example, instead of what's in the example at the bottom:
+
+```sqlite> insert into api.call(func, arg1, arg2, arg3) values
+-- load in the file
+    ('loadlines', 'alltogether.txt', 'b', NULL),
+-- split the array into rows
+    ('json_explode_arr', 'b', 'line', 'bs'),
+-- explode the json into columns
+    ('json_explode_obj', 'bs', 'value', 'battrs');
+```
+
+Instead you can do:
+
+```
+sqlite> insert into api.command values
+    ('loadlines alltogether.txt b'),
+    ('json_explode_arr b line bs'),
+    ('json_explode_obj bs value batters');
+```
+
+It's pretty brain dead, so if you have multiple spaces or embed quotes, you'll have a sad
+at least for now.
+
 ## Load a file into a table where each row is a line
 
 This will load the contents of the file `test.txt` into a table named `log`
 (which it will create if it doesn't already exist) and put in one row per
-line. The table has two columns `name` and `line` and `name` is the name of 
+line. The table has two columns `name` and `line` and `name` is the name of
 the file it was loaded from and `line` is the line from the file.
 
 ```
@@ -46,25 +75,30 @@ sqlite> select * from log;
 ```
 
 ## Load a file with colon delimiters into a table
-There are a few file formats that have _something_ followed by a `:` followed 
-by the rest of a line. The output of `grep` and `gsh` do this, but there are 
+
+There are a few file formats that have _something_ followed by a `:` followed
+by the rest of a line. The output of `grep` and `gsh` do this, but there are
 others.
 
 The arguments to put in the `api.call` table are
-  * func: `split_on_colon`
-  * arg1: the table we're going to split from
-  * arg2: the columns from that table to carry over into the new table
-  * arg3: the column in the original table to split on the colon
-  * arg4: the name of the table to be created
-  * arg5: the name of the column in the new table that will hold the text
-       between the beginning of the line and the first colon
-The remainder of the line from whence we split will be put in a column named `line`.
+
+- func: `split_on_colon`
+- arg1: the table we're going to split from
+- arg2: the columns from that table to carry over into the new table
+- arg3: the column in the original table to split on the colon
+- arg4: the name of the table to be created
+- arg5: the name of the column in the new table that will hold the text
+  between the beginning of the line and the first colon
+  The remainder of the line from whence we split will be put in a column named `line`.
 
 For example, if you grepped the source code for WHERE statements like this:
+
 ```
 $ grep -n WHERE *.sql > glog.txt
 ```
+
 And the first few lines of `glog.txt` would look like this:
+
 ```
 api.sql:13:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;
 api.sql:18:WHERE a = 0;
@@ -79,6 +113,7 @@ call_json_explode_obj.sql:39:      END AS THE_WHERE
 ```
 
 You can do this:
+
 ```
 sqlite> .read api_init.sql
 sqlite> insert into api.call VALUES
@@ -101,8 +136,8 @@ sqlite> select * from bs;
 ... more lines here ...
 ```
 
-If we were doing `gsh` or `grep` without the `-n`, we'd be all good, but here, the line column starts with *number*:, which 
-isn't wonderful. We can do `split_on_colon` again, here we drop to column that only held `glog.txt` by only carrying the column 
+If we were doing `gsh` or `grep` without the `-n`, we'd be all good, but here, the line column starts with _number_:, which
+isn't wonderful. We can do `split_on_colon` again, here we drop to column that only held `glog.txt` by only carrying the column
 named `file` into the new table.
 
 ```
@@ -124,11 +159,14 @@ sqlite> select * from bss;
 | 9         | call_json_explode_obj.sql | 12     | --   WHERE                                                                                                 |
 
 ```
+
 ## Explode a column of json arrays into rows
+
 This will take arrays from the table and column named in arg1 and arg2 respectively, and create
 a new table (arg3) with a single column named `value` that has each of the array items in a separate row.
 
 The `src_rowid` column has the value of the `rowid` column from where the data originated from.
+
 ```
 sqlite> create table foo (data);
 sqlite> insert into foo (data) values ('[1,2]'), ('[3,4]');
@@ -148,6 +186,7 @@ sqlite> select * from exfoo;
 ## Explode a column of json objects into a table where every top level key is column
 
 The `src_rowid` column has the value of the `rowid` column from where the data originated from.
+
 ```
 sqlite> create table bar (data);
 sqlite> insert into bar (data) values ('{"a": 5, "b": 6}'), ('{"b": 7, "c":8}');
@@ -162,11 +201,12 @@ sqlite> select * from exbar;
 +-----------+---+---+---+
 ```
 
-You can also supply a value to `arg4` in the `api.call` table to have it exclude rows in the output 
+You can also supply a value to `arg4` in the `api.call` table to have it exclude rows in the output
 where the input json object was empty, avoiding a bunch of rows that would otherwise contain just
 a `src_rowid` value. The value supplied merely needs to be not `NULL`.
 
 ## Print a value
+
 ```
 sqlite> insert into api.call (func, arg1) values ('print', 'HELLO!');
 sqlite> .read api.sql
@@ -176,18 +216,21 @@ HELLO!
 ## Do nothing
 
 Just does nothing.
+
 ```
 sqlite> insert into api.call (func) values ('noop');
 sqlite> .read api.sql
 ```
 
 # What Got Skipped?
+
 `json_explode_arr` and `json_explode_obj` skip non-JSON rows, as well as JSON
 things that are not arrays or objects, respectively. You might want to check
 to know what if anything got skipped.
 
 If `f` is the original table, `t` the original column, and `o` the new table, you can run this query to
 find the rows in the original table that were skipped.
+
 ```
 SELECT f.t
 FROM f
@@ -218,18 +261,19 @@ named file at every level, but so far haven't tried it.
 If you insert multiple instructions into the `api.call` table, you can
 string together as series of operations. For example, we'll start with
 a file named `alltogether.txt` containing:
+
 ```
 [{"a": 5, "b": 6}, {"b": 7, "c":8}]
 ```
 
 ```
 sqlite> .read api_init.sql
-sqlite> insert into api.call(func, arg1, arg2, arg3) values 
+sqlite> insert into api.call(func, arg1, arg2, arg3) values
 -- load in the file
     ('loadlines', 'alltogether.txt', 'b', NULL),
 -- split the array into rows
     ('json_explode_arr', 'b', 'line', 'bs'),
--- explode the json into columns	
+-- explode the json into columns
     ('json_explode_obj', 'bs', 'value', 'battrs');
 sqlite> .read api.sql
 sqlite> select * from b;
@@ -255,11 +299,13 @@ sqlite> select * from battrs;
 ```
 
 # Miscellaneous
+
 You probably don't want to have to copy this all around any time you want to use it. So what can do is
 use the `api.config` table to tell the api where to load its files from.
 
 So if your sqlite_api directory is a subdirectory of the current directory, you can
 do something like this:
+
 ```
 .read sqlite_api/api_init.sql
 insert into api.config (path) VALUES ('./sqlite_api/');
@@ -268,6 +314,7 @@ insert into api.config (path) VALUES ('./sqlite_api/');
 ```
 
 # VSCode
+
 If you install the `vscode-sqlite` plugin in vscode, you'll want
 to use the `.cd` command so it runs where you think, but it works.
 
@@ -275,4 +322,4 @@ to use the `.cd` command so it runs where you think, but it works.
 
 # TODOs
 
-* Probably some notion of a compound command
+- Probably some notion of a compound command

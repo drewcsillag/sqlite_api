@@ -10,3 +10,6 @@ CREATE TABLE api.call (
 
 CREATE TABLE api.config(
     path);
+
+CREATE TABLE api.command(
+    command);
