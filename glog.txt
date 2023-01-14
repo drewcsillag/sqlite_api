@@ -1,0 +1,24 @@
+api.sql:13:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+api.sql:18:WHERE a = 0;
+api.sql:21:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
+api.sql:27:) WHERE a = 0;
+api.sql:42:-- ' as line from api._call)) WHERE a = 0;
+api_init.sql:3:SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;
+call_json_explode_arr.sql:19:    WHERE json_valid(z.`" || THE_COLUMN || "`)
+call_json_explode_arr.sql:22:)) WHERE a = 0
+call_json_explode_obj.sql:12:--   WHERE
+call_json_explode_obj.sql:39:      END AS THE_WHERE
+call_json_explode_obj.sql:55:  WHERE
+call_json_explode_obj.sql:71:      || "` WHERE json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN
+call_json_explode_obj.sql:72:      || "`) AND json_type(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) = ''object''" || THE_WHERE || ";'
+call_json_explode_obj.sql:77:) WHERE a = 0;
+call_json_explode_obj.sql:84:) WHERE a = 0;
+call_loadlines.sql:14:--     FROM split WHERE str!=''
+call_loadlines.sql:15:-- ) insert into x SELECT THE_FILENAME,  word FROM split WHERE word!='';
+call_loadlines.sql:37:    WHERE str!=''
+call_loadlines.sql:39:  WHERE word != 'C78C8DAC-5DF3-4D5D-BB96-C5A6AB04EB7F';"
+call_loadlines.sql:43: ) WHERE a = 0;
+call_loadlines_colon.sql:34:    WHERE str!=''
+call_loadlines_colon.sql:36:  WHERE word != 'C78C8DAC-5DF3-4D5D-BB96-C5A6AB04EB7F')  
+call_loadlines_colon.sql:41: ) WHERE a = 0;
+call_split_on_colon.sql:26: ) WHERE a = 0;

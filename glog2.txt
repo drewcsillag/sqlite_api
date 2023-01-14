@@ -1,0 +1,99 @@
+api.sql-        SELECT rowid, '["' || REPLACE(command, ' ', '","') || '"]' AS j FROM api.command
+api.sql:        WHERE substr(command,1,8) != 'cluster '
+api.sql-    )
+--
+api.sql-                    substr(command, instr(command, ' ') + 1 ) AS rest from command
+api.sql:                WHERE substr(command,1,8) == 'cluster '
+api.sql-            )
+--
+api.sql-  SELECT func, arg1, arg2, arg3, arg4, arg5 FROM api.call, (SELECT MIN(rowid) AS m 
+api.sql:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+api.sql-SELECT a FROM ( -- to inhibit the output of writefile
+--
+api.sql-))
+api.sql:WHERE a = 0;
+api.sql-.read .sqlite_temp/docall1.out
+api.sql-DELETE from api._call;
+api.sql:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
+api.sql------ End of instruction
+--
+api.sql-GROUP BY key
+api.sql:) WHERE a = 0;
+api.sql-.read .sqlite_temp/docalls.out
+--
+api.sql--- ----- End of function .read
+api.sql:-- ' as line from api._call)) WHERE a = 0;
+api.sql-
+--
+api_init.sql--- where x=1 bit to inhibit a 0 getting written to the terminal
+api_init.sql:SELECT * from (SELECT writefile('.sqlite_temp/marker', '') as x) WHERE x=1;
+api_init.sql-
+--
+call_cluster.sql-    JOIN delimiting t2 ON t2.rowid <= t1.rowid
+call_cluster.sql:    WHERE " || THE_DELIMITER_EXPR || "
+call_cluster.sql-        OR t2.rowid = 1
+--
+call_cluster.sql- GROUP BY key
+call_cluster.sql: ) WHERE a = 0;
+call_cluster.sql-;
+--
+call_json_explode_arr.sql-    FROM json_each(z.`" || THE_COLUMN || "`) je, `" || THE_TABLE || "` z 
+call_json_explode_arr.sql:    WHERE json_valid(z.`" || THE_COLUMN || "`)
+call_json_explode_arr.sql-      AND 'array' = json_type(z.`" || THE_COLUMN || "`);" as line
+call_json_explode_arr.sql-FROM THE_CALL
+call_json_explode_arr.sql:)) WHERE a = 0
+call_json_explode_arr.sql-;
+--
+call_json_explode_obj.sql---     json_each(`THE_TABLE`.`THE_COLUMN`) je
+call_json_explode_obj.sql:--   WHERE
+call_json_explode_obj.sql---     json_valid(`THE_TABLE.`THE_COLUMN`)
+--
+call_json_explode_obj.sql-      ELSE " AND `" || arg2 || "` != ''{}''"
+call_json_explode_obj.sql:      END AS THE_WHERE
+call_json_explode_obj.sql-    FROM api._call
+--
+call_json_explode_obj.sql-    json_each(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) je
+call_json_explode_obj.sql:  WHERE
+call_json_explode_obj.sql-    json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN || "`)
+--
+call_json_explode_obj.sql-      || "`, ''$.""' || key || '""'')', ', ') || ' FROM `" || THE_TABLE
+call_json_explode_obj.sql:      || "` WHERE json_valid(`" || THE_TABLE || "`.`" || THE_COLUMN
+call_json_explode_obj.sql:      || "`) AND json_type(`" || THE_TABLE || "`.`" || THE_COLUMN || "`) = ''object''" || THE_WHERE || ";'
+call_json_explode_obj.sql- FROM
+--
+call_json_explode_obj.sql-GROUP BY key
+call_json_explode_obj.sql:) WHERE a = 0;
+call_json_explode_obj.sql-;" AS block
+--
+call_json_explode_obj.sql-GROUP BY key
+call_json_explode_obj.sql:) WHERE a = 0;
+call_json_explode_obj.sql-;
+--
+call_loadlines.sql---     substr(str, instr(str, CHAR(10))+1)
+call_loadlines.sql:--     FROM split WHERE str!=''
+call_loadlines.sql:-- ) insert into x SELECT THE_FILENAME,  word FROM split WHERE word!='';
+call_loadlines.sql--- .read docall2.out
+--
+call_loadlines.sql-    FROM split
+call_loadlines.sql:    WHERE str!=''
+call_loadlines.sql-) INSERT INTO `" || THE_TABLE || "` SELECT """ || THE_FILENAME || """, word FROM split
+call_loadlines.sql:  WHERE word != 'C78C8DAC-5DF3-4D5D-BB96-C5A6AB04EB7F';"
+call_loadlines.sql- FROM THE_call
+--
+call_loadlines.sql- GROUP BY key
+call_loadlines.sql: ) WHERE a = 0;
+call_loadlines.sql-
+--
+call_loadlines_colon.sql-    FROM split
+call_loadlines_colon.sql:    WHERE str!=''
+call_loadlines_colon.sql-) SELECT word FROM split 
+call_loadlines_colon.sql:  WHERE word != 'C78C8DAC-5DF3-4D5D-BB96-C5A6AB04EB7F')  
+call_loadlines_colon.sql-  ;"
+--
+call_loadlines_colon.sql- GROUP BY key
+call_loadlines_colon.sql: ) WHERE a = 0;
+call_loadlines_colon.sql-.read .sqlite_temp/docall2.out
+--
+call_split_on_colon.sql- GROUP BY key
+call_split_on_colon.sql: ) WHERE a = 0;
+call_split_on_colon.sql-;
