@@ -223,6 +223,61 @@ sqlite> insert into api.call (func) values ('noop');
 sqlite> .read api.sql
 ```
 
+## Cluster lines together based on a delimiter
+For example, if you have a file that's line delimited, such as you get when you use `grep` with the `-A`, `-B`,
+and/or `-C` that looks like this (having `--` as the delimiter):
+```
+api.sql:        WHERE substr(command,1,8) != 'cluster '
+api.sql-    )
+--
+api.sql-                    substr(command, instr(command, ' ') + 1 ) AS rest from command
+api.sql:                WHERE substr(command,1,8) == 'cluster '
+api.sql-            )
+--
+api.sql-  SELECT func, arg1, arg2, arg3, arg4, arg5 FROM api.call, (SELECT MIN(rowid) AS m
+api.sql:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;
+api.sql-SELECT a FROM ( -- to inhibit the output of writefile
+--
+api.sql-))
+api.sql:WHERE a = 0;
+api.sql-.read .sqlite_temp/docall1.out
+api.sql-DELETE from api._call;
+api.sql:DELETE from api.call WHERE rowid = (select min(rowid) from api.call);
+api.sql------ End of instruction
+```
+With a file like this, and you want to be able to process the individual sections, you can use the `cluster` function
+to assign group numbers to those lines, so that you can process the groups.
+
+So given the above `grep` output, you can do this:
+```
+sqlite> insert into api.command values
+   ...>  ('loadlines glog2.txt b'),
+   ...>  ('cluster b line c maybe_delimiter = ''--''');
+sqlite> .read api.sql
+sqlite> select * from c limit 10;
++-----------+----------+--------------------------------------------------------------------------------------------------+
+| src_rowid | group_no |                                               line                                               |
++-----------+----------+--------------------------------------------------------------------------------------------------+
+| 1         | 1        | api.sql-        SELECT rowid, '["' || REPLACE(command, ' ', '","') || '"]' AS j FROM api.command |
+| 2         | 1        | api.sql:        WHERE substr(command,1,8) != 'cluster '                                          |
+| 3         | 1        | api.sql-    )                                                                                    |
+| 4         | 4        | --                                                                                               |
+| 5         | 4        | api.sql-                    substr(command, instr(command, ' ') + 1 ) AS rest from command       |
+| 6         | 4        | api.sql:                WHERE substr(command,1,8) == 'cluster '                                  |
+| 7         | 4        | api.sql-            )                                                                            |
+| 8         | 8        | --                                                                                               |
+| 9         | 8        | api.sql-  SELECT func, arg1, arg2, arg3, arg4, arg5 FROM api.call, (SELECT MIN(rowid) AS m       |
+| 10        | 8        | api.sql:  FROM api.call) fmin WHERE fmin.m = api.call.rowid;                                     |
++-----------+----------+--------------------------------------------------------------------------------------------------+
+```
+In the above output, you'll notice that the group_no changes when it encounters the delimiter.
+
+The arguments to `cluster` are:
+* the source table
+* the column from the table to use (and copy to the new table)
+* the new table to create
+* the expression to check for the delimiter, where the variable you compare with is called `maybe_delimiter`
+
 # What Got Skipped?
 
 `json_explode_arr` and `json_explode_obj` skip non-JSON rows, as well as JSON
