@@ -14,7 +14,7 @@ FROM
         json_extract(j, '$[5]') as arg5
     FROM (
         SELECT rowid, '["' || REPLACE(command, ' ', '","') || '"]' AS j FROM api.command
-        WHERE substr(command,1,8) != 'cluster '
+        WHERE substr(command,1,8) != 'cluster ' and substr(command,1,6) != 'shell '
     )
 
     UNION ALL
@@ -48,8 +48,24 @@ FROM
             )
         )
     )
+    UNION ALL
+    -- handle 'shell'
+    SELECT 
+        rowid, 
+        func, 
+        substr(rest, 1, instr(rest, ' ') - 1) AS arg1,
+        substr(rest, instr(rest, ' ') + 1) AS arg2,
+        null as arg3,
+        null as arg4,
+        null as arg5
+    FROM (
+        SELECT rowid, substr(command, 1, instr(command, ' ')-1) AS func,
+            substr(command, instr(command, ' ') + 1 ) AS rest from command
+        WHERE substr(command,1,6) == 'shell '
+    ) 
 
 ) order by rowid;
+
 
 
 DELETE FROM api.command;
