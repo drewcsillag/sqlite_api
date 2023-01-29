@@ -14,12 +14,16 @@ FROM
         json_extract(j, '$[5]') as arg5
     FROM (
         SELECT rowid, '["' || REPLACE(command, ' ', '","') || '"]' AS j FROM api.command
-        WHERE substr(command,1,8) != 'cluster ' and substr(command,1,6) != 'shell '
+        WHERE substr(command, 1, 8) != 'cluster '
+            AND substr(command,1, 9) != 'shellcmd '
+            AND substr(command, 1, 11) != 'pipecolumn '
     )
 
     UNION ALL
+    -- at some point, I can probably store the arg count numbers somewhere and do a recursive query here instead
+    -- of nested things, but :shrug: for now
 
-    -- handle the 'clustered' case
+    -- handle 4 argument "rest" cases
     SELECT
         rowid,
         func,
@@ -49,7 +53,7 @@ FROM
         )
     )
     UNION ALL
-    -- handle 'shell'
+    -- handle 2 argument "rest" cases
     SELECT 
         rowid, 
         func, 
@@ -61,9 +65,47 @@ FROM
     FROM (
         SELECT rowid, substr(command, 1, instr(command, ' ')-1) AS func,
             substr(command, instr(command, ' ') + 1 ) AS rest from command
-        WHERE substr(command,1,6) == 'shell '
+        WHERE substr(command,1,9) == 'shellcmd '
     ) 
-
+    UNION ALL
+    -- handle 5 argument "rest" cases
+    SELECT
+        rowid,
+        func,
+        arg1,
+        arg2,
+        arg3,
+        substr(rest, 1, instr(rest, ' ') - 1) AS arg4,
+        substr(rest, instr(rest, ' ') + 1) AS arg5
+    FROM (
+        SELECT
+            rowid,
+            func,
+            arg1,
+            arg2,
+            substr(rest, 1, instr(rest, ' ') - 1) AS arg3,
+            substr(rest, instr(rest, ' ') + 1) AS rest
+        FROM (
+            SELECT
+                rowid,
+                func,
+                arg1,
+                substr(rest, 1, instr(rest, ' ') - 1) AS arg2,
+                substr(rest, instr(rest, ' ') + 1) AS rest
+            FROM (
+                SELECT
+                    rowid,
+                    func,
+                    substr(rest, 1, instr(rest, ' ') - 1) AS arg1,
+                    substr(rest, instr(rest, ' ') + 1) AS rest
+                FROM (
+                    SELECT rowid, substr(command, 1, instr(command, ' ')-1) AS func,
+                        substr(command, instr(command, ' ') + 1 ) AS rest from command
+                    WHERE substr(command, 1, 11) == 'pipecolumn '
+                )
+            )
+        )
+    )
 ) order by rowid;
 
 

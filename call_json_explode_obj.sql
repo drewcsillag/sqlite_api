@@ -82,6 +82,6 @@ SELECT 0, '.read .sqlite_temp/docall3.out'
 ) lines
 GROUP BY key
 ) WHERE a = 0;
-;
+
 
 .read .sqlite_temp/docall2.out
